@@ -25,39 +25,67 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 1rem 0; 
+            padding: 0.5rem;
+        }
+        @media (min-width: 640px) {
+            .quiz-container-wrapper {
+                padding: 1rem;
+            }
         }
         .quiz-container {
             background-color: white;
-            padding: 2.5rem; 
+            padding: 1rem;
             border-radius: 1rem; 
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
             width: 100%;
             max-width: 64rem; 
-            margin: 1rem;
+            margin: 0.5rem;
+        }
+        @media (min-width: 640px) {
+            .quiz-container {
+                padding: 2.5rem;
+                margin: 1rem;
+            }
         }
         .app-header {
             background: linear-gradient(135deg, #6366f1, #8b5cf6); 
             color: white;
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 1rem;
             border-radius: 0.75rem 0.75rem 0 0; 
             text-align: center;
-            margin: -2.5rem -2.5rem 2.5rem -2.5rem; 
+            margin: -1rem -1rem 1.5rem -1rem; 
+        }
+        @media (min-width: 640px) {
+            .app-header {
+                padding: 2rem 1.5rem;
+                margin: -2.5rem -2.5rem 2.5rem -2.5rem; 
+            }
         }
         .app-header h1 {
-            font-size: 2.5rem; 
+            font-size: 1.75rem;
             font-weight: 800;
             letter-spacing: -0.025em;
         }
+        @media (min-width: 640px) {
+            .app-header h1 {
+                font-size: 2.5rem;
+            }
+        }
         .section-card {
             background-color: #f8fafc; 
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 0.75rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             border: 1px solid #e2e8f0; 
         }
+        @media (min-width: 640px) {
+            .section-card {
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
         .btn {
-            padding: 0.875rem 1.75rem; 
+            padding: 0.75rem 1.5rem; 
             border-radius: 0.5rem; 
             font-weight: 600; 
             transition: all 0.2s ease-in-out;
@@ -67,6 +95,13 @@
             justify-content: center;
             text-transform: uppercase; 
             letter-spacing: 0.05em;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .btn {
+                padding: 0.875rem 1.75rem;
+                width: auto;
+            }
         }
         .btn:disabled {
             opacity: 0.5;
@@ -95,13 +130,18 @@
         .input-field, .input-select, .input-file-label-styled { 
             display: block;
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.75rem;
             font-size: 1rem;
             color: #334155; 
             background-color: #ffffff;
             border: 1px solid #cbd5e1; 
             border-radius: 0.5rem;
             transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        @media (min-width: 640px) {
+            .input-field, .input-select, .input-file-label-styled {
+                padding: 0.875rem 1rem;
+            }
         }
         .input-select { 
              appearance: none; 
@@ -125,14 +165,14 @@
         }
 
         .option-btn {
-            display: block; width: 100%; text-align: left;
-            padding: 1rem; 
-            margin-bottom: 0.75rem; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 0.5rem; 
-            transition: all 0.2s ease-in-out;
-            background-color: #fff;
-            font-weight: 500;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        @media (min-width: 640px) {
+            .option-btn {
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+            }
         }
         .option-btn:hover:not(:disabled) {
             background-color: #f0f4ff; 
@@ -171,15 +211,22 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .saved-quiz-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1.25rem; border: 1px solid #e2e8f0;
-            border-radius: 0.75rem; margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
             background-color: #fff;
             transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
-        .saved-quiz-item:hover { 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-            transform: translateY(-3px);
+        @media (min-width: 640px) {
+            .saved-quiz-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.25rem;
+            }
         }
         .saved-quiz-details { flex-grow: 1; }
         .saved-quiz-title { font-weight: 700; font-size:1.125rem; color: #4f46e5; margin-bottom: 0.25rem; }
@@ -198,7 +245,26 @@
         .saved-quiz-class-badge { background-color: #a78bfa; }
         .saved-quiz-discipline-badge { background-color: #78716c; }
 
-        .saved-quiz-actions button { margin-left: 0.75rem; padding: 0.6rem 1rem; }
+        .saved-quiz-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        @media (min-width: 640px) {
+            .saved-quiz-actions {
+                margin-top: 0;
+                margin-left: 1rem;
+            }
+        }
+        .saved-quiz-actions button {
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .saved-quiz-actions button {
+                width: auto;
+                margin-left: 0.75rem;
+            }
+        }
         
         h2.section-title {
             font-size: 1.75rem; 
@@ -210,11 +276,13 @@
             display: inline-block; 
         }
         h3.question-text-style {
-            font-size: 1.375rem; 
-            font-weight: 600;
-            color: #0f172a; 
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            font-size: 1.25rem;
+            line-height: 1.5;
+        }
+        @media (min-width: 640px) {
+            .question-text-style {
+                font-size: 1.375rem;
+            }
         }
         #currentQuizTitle {
             font-size: 2rem; 
@@ -257,13 +325,196 @@
         }
         .filter-controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr;
             gap: 1rem;
             margin-bottom: 1.5rem;
             padding: 1rem;
             background-color: #ffffff;
             border-radius: 0.5rem;
             border: 1px solid #e2e8f0;
+        }
+        @media (min-width: 640px) {
+            .filter-controls {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+        }
+        .results-section {
+            padding: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .results-section {
+                padding: 2.5rem;
+            }
+        }
+        .results-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 640px) {
+            .results-section h2 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+        .results-section p {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 640px) {
+            .results-section p {
+                font-size: 1.25rem;
+                margin-bottom: 2rem;
+            }
+        }
+        .results-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            .results-buttons {
+                flex-direction: row;
+                justify-content: center;
+                gap: 1.5rem;
+            }
+        }
+        .results-buttons button {
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .results-buttons button {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .btn, .option-btn, .input-field, .input-select, .input-file-label-styled {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .saved-quiz-item {
+                padding: 1rem;
+            }
+            
+            .saved-quiz-actions button {
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+            }
+            
+            .filter-controls {
+                padding: 0.75rem;
+            }
+            
+            .section-card {
+                padding: 1rem;
+            }
+            
+            .app-header {
+                padding: 1.25rem 1rem;
+            }
+            
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .question-text-style {
+                font-size: 1.125rem;
+            }
+            
+            .results-section h2 {
+                font-size: 1.5rem;
+            }
+            
+            .results-section p {
+                font-size: 1rem;
+            }
+            
+            .feedback {
+                padding: 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .saved-quiz-title {
+                font-size: 1rem;
+            }
+            
+            .saved-quiz-info {
+                font-size: 0.75rem;
+            }
+            
+            .saved-quiz-class-badge, .saved-quiz-discipline-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+        
+        /* Melhorias de acessibilidade e usabilidade */
+        .btn:focus, .option-btn:focus, .input-field:focus, .input-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn:active, .option-btn:active {
+            transform: scale(0.98);
+        }
+        
+        @media (hover: hover) {
+            .btn:hover:not(:disabled), .option-btn:hover:not(:disabled) {
+                transform: translateY(-1px);
+            }
+        }
+        
+        /* Melhorias de performance */
+        .quiz-container {
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        
+        .saved-quiz-item {
+            will-change: transform;
+        }
+        
+        /* Melhorias de scroll */
+        #savedQuizzesList {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        
+        /* Melhorias de input */
+        .input-field, .input-select {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        /* Melhorias de texto */
+        @media (max-width: 640px) {
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .text-xl {
+                font-size: 1.25rem;
+            }
+            
+            .text-lg {
+                font-size: 1.125rem;
+            }
         }
     </style>
 </head>
@@ -279,7 +530,7 @@
             <section class="section-card">
                 <h2 class="section-title">Criar Novo Quiz</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="grid">
                     <div>
                         <label for="pdfFileTrigger" class="input-label">1. Ficheiro PDF:</label>
                         <label for="pdfFile" id="pdfFileTrigger" class="input-file-label-styled">
@@ -293,24 +544,24 @@
                     </div>
                     <div>
                         <label for="quizClassSelect" class="input-label">2. Classe:</label>
-                        <select id="quizClassSelect" class="input-select w-full">
-                            </select>
+                        <select id="quizClassSelect" class="input-select">
+                        </select>
                     </div>
-                     <div>
+                    <div>
                         <label for="quizDisciplineInput" class="input-label">3. Disciplina:</label>
-                        <input type="text" id="quizDisciplineInput" class="input-field w-full" placeholder="Ex: Matemática, Português...">
+                        <input type="text" id="quizDisciplineInput" class="input-field" placeholder="Ex: Matemática, Português...">
                     </div>
                 </div>
                 <p id="fileProcessingMessage" class="mt-3 text-xs text-slate-600 hidden"></p>
 
-                <button id="generateQuizBtn" class="btn btn-primary mt-8 w-full">
+                <button id="generateQuizBtn" class="btn btn-primary mt-8">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
                     </svg>
                     4. Gerar Quiz e Guardar
                 </button>
-                 <p class="mt-4 text-xs text-orange-700 font-semibold text-center">
-                    ⚠️ PDFs com mais de 100 páginas podem demorar mais tempo a processar!
+                <p class="mt-4 text-xs text-orange-700 font-semibold text-center">
+                    ⚠️ Lembre-se de configurar as Políticas RLS na sua base de dados Supabase (especialmente para INSERT)!
                 </p>
             </section>
 
@@ -320,28 +571,27 @@
                 <div class="filter-controls">
                     <div>
                         <label for="filterClassSelect" class="input-label">Filtrar por Classe:</label>
-                        <select id="filterClassSelect" class="input-select w-full">
+                        <select id="filterClassSelect" class="input-select">
                             <option value="">Todas as Classes</option>
-                            </select>
+                        </select>
                     </div>
                     <div>
                         <label for="filterDisciplineInput" class="input-label">Filtrar por Disciplina:</label>
-                        <input type="text" id="filterDisciplineInput" class="input-field w-full" placeholder="Digite a disciplina...">
+                        <input type="text" id="filterDisciplineInput" class="input-field" placeholder="Digite a disciplina...">
                     </div>
                 </div>
 
                 <div id="savedQuizzesList" class="max-h-96 overflow-y-auto mt-4 space-y-4">
-                    </div>
+                </div>
                 <p id="noSavedQuizzesMsg" class="text-sm text-slate-500 hidden mt-4 text-center py-4">Ainda não há quizzes guardados ou que correspondam aos filtros.</p>
-                <button id="refreshQuizzesBtn" class="btn btn-secondary mt-6 w-full text-sm py-2.5">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <button id="refreshQuizzesBtn" class="btn btn-secondary mt-6 text-sm py-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                     </svg>
                     Atualizar / Limpar Filtros
                 </button>
             </section>
         </div>
-
 
         <div id="loaderContainer" class="hidden loader-container">
             <div class="loader"></div>
@@ -352,7 +602,7 @@
             <div id="questionContainer" class="mb-6">
                 <h2 id="currentQuizTitle"></h2>
                 <p id="currentQuizPdfName"></p>
-                <div class="flex items-center space-x-3 mb-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
                     <p id="currentQuizClassDisplay" class="font-medium mb-0"></p>
                     <p id="currentQuizDisciplineDisplay" class="font-medium mb-0"></p>
                 </div>
@@ -360,19 +610,19 @@
                 <div id="optionsContainer" class="space-y-3"></div>
             </div>
             <div id="feedbackArea" class="mb-6"></div>
-            <div class="flex justify-between items-center mt-8">
-                 <p id="quizStatusMessage" class="text-sm font-medium"></p>
-                <button id="nextQuestionBtn" class="btn btn-primary">Próxima Pergunta</button>
+            <div class="flex flex-col sm:flex-row justify-between items-center mt-8 space-y-4 sm:space-y-0">
+                <p id="quizStatusMessage" class="text-sm font-medium"></p>
+                <button id="nextQuestionBtn" class="btn btn-primary w-full sm:w-auto">Próxima Pergunta</button>
             </div>
-             <button id="backToMainBtnQuiz" class="btn btn-secondary mt-10 w-full">Voltar ao Início</button>
+            <button id="backToMainBtnQuiz" class="btn btn-secondary mt-10">Voltar ao Início</button>
         </div>
 
-        <div id="resultsSection" class="hidden section-card text-center py-10">
+        <div id="resultsSection" class="hidden section-card results-section text-center">
             <h2 id="resultsQuizTitle" class="mb-6"></h2>
             <p id="scoreText" class="text-3xl font-bold mb-10"></p>
-            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                <button id="restartQuizBtn" class="btn btn-primary w-full sm:w-auto">Jogar Novamente este Quiz</button>
-                <button id="backToMainBtnResults" class="btn btn-secondary w-full sm:w-auto">Voltar ao Início</button>
+            <div class="results-buttons">
+                <button id="restartQuizBtn" class="btn btn-primary">Jogar Novamente este Quiz</button>
+                <button id="backToMainBtnResults" class="btn btn-secondary">Voltar ao Início</button>
             </div>
         </div>
 
