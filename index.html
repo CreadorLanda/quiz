@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Quiz Inteligente Avançado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; 
+            color: #334155; 
+        }
+        .quiz-container-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem 0; 
+        }
+        .quiz-container {
+            background-color: white;
+            padding: 2.5rem; 
+            border-radius: 1rem; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+            width: 100%;
+            max-width: 64rem; 
+            margin: 1rem;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
+            color: white;
+            padding: 2rem 1.5rem;
+            border-radius: 0.75rem 0.75rem 0 0; 
+            text-align: center;
+            margin: -2.5rem -2.5rem 2.5rem -2.5rem; 
+        }
+        .app-header h1 {
+            font-size: 2.5rem; 
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+        .section-card {
+            background-color: #f8fafc; 
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0; 
+        }
+        .btn {
+            padding: 0.875rem 1.75rem; 
+            border-radius: 0.5rem; 
+            font-weight: 600; 
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase; 
+            letter-spacing: 0.05em;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #6366f1; 
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4f46e5; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.45);
+        }
+        .btn-secondary {
+            background-color: #64748b; 
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(100, 116, 139, 0.39);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #475569; 
+            transform: translateY(-2px);
+        }
+        .input-field, .input-select, .input-file-label-styled { 
+            display: block;
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            color: #334155; 
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1; 
+            border-radius: 0.5rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-select { 
+             appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem; 
+        }
+        .input-field:focus, .input-select:focus, .input-file-label-styled:focus-within { 
+            outline: none;
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 0.875rem; 
+            font-weight: 500; 
+            color: #475569; 
+            margin-bottom: 0.5rem; 
+        }
+
+        .option-btn {
+            display: block; width: 100%; text-align: left;
+            padding: 1rem; 
+            margin-bottom: 0.75rem; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 0.5rem; 
+            transition: all 0.2s ease-in-out;
+            background-color: #fff;
+            font-weight: 500;
+        }
+        .option-btn:hover:not(:disabled) {
+            background-color: #f0f4ff; 
+            border-color: #818cf8; 
+            transform: scale(1.01); 
+        }
+        .option-btn.correct {
+            background-color: #ecfdf5 !important; 
+            border-color: #34d399 !important; 
+            color: #065f46 !important; 
+            font-weight: 600;
+        }
+        .option-btn.incorrect {
+            background-color: #fff1f2 !important; 
+            border-color: #f87171 !important; 
+            color: #9f1239 !important; 
+            font-weight: 600;
+        }
+        .feedback {
+            padding: 1.25rem; border-radius: 0.5rem; margin-top: 1.5rem; font-size: 1rem;
+            text-align: center; font-weight: 500;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: #fff1f2; color: #9f1239; border: 1px solid #fecaca;
+        }
+        .loader-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem;
+        }
+        .loader {
+            border: 6px solid #e0e7ff; border-top: 6px solid #6366f1; border-radius: 50%;
+            width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 1.5rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .saved-quiz-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem; border: 1px solid #e2e8f0;
+            border-radius: 0.75rem; margin-bottom: 1rem;
+            background-color: #fff;
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .saved-quiz-item:hover { 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            transform: translateY(-3px);
+        }
+        .saved-quiz-details { flex-grow: 1; }
+        .saved-quiz-title { font-weight: 700; font-size:1.125rem; color: #4f46e5; margin-bottom: 0.25rem; }
+        .saved-quiz-info { font-size: 0.875rem; color: #64748b; }
+        .saved-quiz-meta { margin-top: 0.5rem; }
+        .saved-quiz-class-badge, .saved-quiz-discipline-badge {
+            font-size: 0.75rem; 
+            font-weight: 600;
+            color: #fff;
+            padding: 0.25rem 0.6rem;
+            border-radius: 1rem; 
+            display: inline-block;
+            margin-top: 0.3rem;
+            margin-right: 0.5rem;
+        }
+        .saved-quiz-class-badge { background-color: #a78bfa; }
+        .saved-quiz-discipline-badge { background-color: #78716c; }
+
+        .saved-quiz-actions button { margin-left: 0.75rem; padding: 0.6rem 1rem; }
+        
+        h2.section-title {
+            font-size: 1.75rem; 
+            font-weight: 700;
+            color: #1e293b; 
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #6366f1; 
+            display: inline-block; 
+        }
+        h3.question-text-style {
+            font-size: 1.375rem; 
+            font-weight: 600;
+            color: #0f172a; 
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        #currentQuizTitle {
+            font-size: 2rem; 
+            font-weight: 700;
+            color: #4338ca; 
+            margin-bottom: 0.25rem;
+        }
+        #currentQuizPdfName, #currentQuizClassDisplay, #currentQuizDisciplineDisplay {
+            font-size: 0.9rem; 
+            color: #475569; 
+            margin-bottom: 0.25rem;
+        }
+        #currentQuizClassDisplay, #currentQuizDisciplineDisplay { margin-bottom: 0.5rem; font-style: italic; }
+        #currentQuizDisciplineDisplay { margin-bottom: 1.5rem; }
+
+
+         #resultsQuizTitle {
+            font-size: 2rem; 
+            font-weight: 700;
+            color: #4338ca; 
+        }
+        #scoreText {
+            font-size: 1.25rem; 
+            color: #1e293b; 
+        }
+        .input-file-label-styled { 
+            display: inline-block;
+            cursor: pointer;
+            font-weight: 500;
+            text-align: center;
+        }
+        #pdfFile {
+            display: none; 
+        }
+        #fileNameDisplay {
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-1 sm:p-4">
+
+<div class="quiz-container-wrapper">
+    <div class="quiz-container">
+        <header class="app-header">
+            <h1>Gerador de Quiz Inteligente</h1>
+        </header>
+
+        <div id="mainSelectionSection">
+            <section class="section-card">
+                <h2 class="section-title">Criar Novo Quiz</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div>
+                        <label for="pdfFileTrigger" class="input-label">1. Ficheiro PDF:</label>
+                        <label for="pdfFile" id="pdfFileTrigger" class="input-file-label-styled">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Escolher PDF
+                        </label>
+                        <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                        <p id="fileNameDisplay" class="text-sm text-slate-500 mt-2"></p>
+                    </div>
+                    <div>
+                        <label for="quizClassSelect" class="input-label">2. Classe:</label>
+                        <select id="quizClassSelect" class="input-select w-full">
+                            </select>
+                    </div>
+                     <div>
+                        <label for="quizDisciplineInput" class="input-label">3. Disciplina:</label>
+                        <input type="text" id="quizDisciplineInput" class="input-field w-full" placeholder="Ex: Matemática, Português...">
+                    </div>
+                </div>
+                <p id="fileProcessingMessage" class="mt-3 text-xs text-slate-600 hidden"></p>
+
+                <button id="generateQuizBtn" class="btn btn-primary mt-8 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                    </svg>
+                    4. Gerar Quiz e Guardar
+                </button>
+                 <p class="mt-4 text-xs text-orange-700 font-semibold text-center">
+                    ⚠️ Lembre-se de configurar as Políticas RLS na sua base de dados Supabase (especialmente para INSERT)!
+                </p>
+            </section>
+
+            <section class="section-card mt-8">
+                <h2 class="section-title">Quizzes Guardados</h2>
+                
+                <div class="filter-controls">
+                    <div>
+                        <label for="filterClassSelect" class="input-label">Filtrar por Classe:</label>
+                        <select id="filterClassSelect" class="input-select w-full">
+                            <option value="">Todas as Classes</option>
+                            </select>
+                    </div>
+                    <div>
+                        <label for="filterDisciplineInput" class="input-label">Filtrar por Disciplina:</label>
+                        <input type="text" id="filterDisciplineInput" class="input-field w-full" placeholder="Digite a disciplina...">
+                    </div>
+                </div>
+
+                <div id="savedQuizzesList" class="max-h-96 overflow-y-auto mt-4 space-y-4">
+                    </div>
+                <p id="noSavedQuizzesMsg" class="text-sm text-slate-500 hidden mt-4 text-center py-4">Ainda não há quizzes guardados ou que correspondam aos filtros.</p>
+                <button id="refreshQuizzesBtn" class="btn btn-secondary mt-6 w-full text-sm py-2.5">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                    </svg>
+                    Atualizar / Limpar Filtros
+                </button>
+            </section>
+        </div>
+
+
+        <div id="loaderContainer" class="hidden loader-container">
+            <div class="loader"></div>
+            <p id="loaderText" class="text-center text-slate-700 font-medium text-xl">Processando...</p>
+        </div>
+
+        <div id="quizSection" class="hidden section-card">
+            <div id="questionContainer" class="mb-6">
+                <h2 id="currentQuizTitle"></h2>
+                <p id="currentQuizPdfName"></p>
+                <div class="flex items-center space-x-3 mb-4">
+                    <p id="currentQuizClassDisplay" class="font-medium mb-0"></p>
+                    <p id="currentQuizDisciplineDisplay" class="font-medium mb-0"></p>
+                </div>
+                <h3 id="questionText" class="question-text-style"></h3>
+                <div id="optionsContainer" class="space-y-3"></div>
+            </div>
+            <div id="feedbackArea" class="mb-6"></div>
+            <div class="flex justify-between items-center mt-8">
+                 <p id="quizStatusMessage" class="text-sm font-medium"></p>
+                <button id="nextQuestionBtn" class="btn btn-primary">Próxima Pergunta</button>
+            </div>
+             <button id="backToMainBtnQuiz" class="btn btn-secondary mt-10 w-full">Voltar ao Início</button>
+        </div>
+
+        <div id="resultsSection" class="hidden section-card text-center py-10">
+            <h2 id="resultsQuizTitle" class="mb-6"></h2>
+            <p id="scoreText" class="text-3xl font-bold mb-10"></p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button id="restartQuizBtn" class="btn btn-primary w-full sm:w-auto">Jogar Novamente este Quiz</button>
+                <button id="backToMainBtnResults" class="btn btn-secondary w-full sm:w-auto">Voltar ao Início</button>
+            </div>
+        </div>
+
+        <div id="errorSection" class="hidden section-card text-center py-10 bg-red-50 border-red-300">
+            <h2 class="text-3xl font-bold mb-4 text-red-700">Ocorreu um Erro</h2>
+            <p id="errorMessage" class="text-red-600 text-lg"></p>
+            <button id="backToMainBtnError" class="btn bg-red-600 hover:bg-red-700 text-white mt-8">
+                Voltar ao Início e Tentar Novamente
+            </button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        // --- Configuração Supabase ---
+        const SUPABASE_URL = 'https://bvueejmhvefxtyhearno.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2dWVlam1odmVmeHR5aGVhcm5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2MTU4NDEsImV4cCI6MjA2MjE5MTg0MX0.5SgLaoEG1LULXH1SIifMIOitquw3H3mpeU35Tzmz-Ak';
+
+        let supabaseClient = null; 
+
+        try {
+            if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+                // console.error("Biblioteca Supabase (supabase.createClient) não encontrada.");
+                // alert("Erro: Biblioteca Supabase não carregada. As funcionalidades da base de dados estarão desabilitadas.");
+            } else if (!SUPABASE_URL || !SUPABASE_ANON_KEY) { 
+                // console.warn("Supabase URL ou Chave Anon não estão definidos.");
+                // alert("Atenção: Supabase URL ou Chave Anon não definidos! As funcionalidades da base de dados não funcionarão.");
+            } else {
+                const { createClient } = supabase; 
+                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                // console.log("Cliente Supabase inicializado.");
+            }
+        } catch (error) {
+            // console.error("Erro ao inicializar o cliente Supabase:", error);
+            // const errorMessageText = error.message ? error.message : "Ocorreu um erro desconhecido durante a inicialização do Supabase.";
+            // alert(`Erro ao inicializar Supabase: ${errorMessageText}. Verifique o console.`);
+        }
+
+        // --- Elementos da UI ---
+        const mainSelectionSection = document.getElementById('mainSelectionSection');
+        const generateQuizBtn = document.getElementById('generateQuizBtn');
+        const pdfFileEl = document.getElementById('pdfFile');
+        const pdfFileTrigger = document.getElementById('pdfFileTrigger');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const quizClassSelect = document.getElementById('quizClassSelect'); 
+        const quizDisciplineInput = document.getElementById('quizDisciplineInput'); 
+        const fileProcessingMessage = document.getElementById('fileProcessingMessage');
+        
+        const filterClassSelect = document.getElementById('filterClassSelect'); 
+        const filterDisciplineInput = document.getElementById('filterDisciplineInput'); 
+
+        const savedQuizzesList = document.getElementById('savedQuizzesList');
+        const noSavedQuizzesMsg = document.getElementById('noSavedQuizzesMsg');
+        const refreshQuizzesBtn = document.getElementById('refreshQuizzesBtn');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const loaderText = document.getElementById('loaderText');
+        const quizSection = document.getElementById('quizSection');
+        const currentQuizTitle = document.getElementById('currentQuizTitle');
+        const currentQuizPdfName = document.getElementById('currentQuizPdfName');
+        const currentQuizClassDisplay = document.getElementById('currentQuizClassDisplay'); 
+        const currentQuizDisciplineDisplay = document.getElementById('currentQuizDisciplineDisplay'); 
+        const questionTextEl = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const quizStatusMessage = document.getElementById('quizStatusMessage'); 
+        const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+        const backToMainBtnQuiz = document.getElementById('backToMainBtnQuiz');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsQuizTitle = document.getElementById('resultsQuizTitle');
+        const scoreTextEl = document.getElementById('scoreText');
+        const restartQuizBtn = document.getElementById('restartQuizBtn');
+        const backToMainBtnResults = document.getElementById('backToMainBtnResults');
+        const errorSection = document.getElementById('errorSection');
+        const errorMessageEl = document.getElementById('errorMessage');
+        const backToMainBtnError = document.getElementById('backToMainBtnError');
+
+        // --- Chave API Gemini ---
+        const API_KEY_GEMINI = "AIzaSyAqZFvOWZu93f8v3DX9MiPiC-Avxytof1M"; 
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY_GEMINI}`;
+
+        // --- Estado do Quiz ---
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionButton = null;
+        let currentPdfNameForQuiz = ""; 
+        let currentQuizClassName = ""; 
+        let currentQuizDisciplineName = ""; 
+        let currentQuizIdFromDb = null; 
+        let allFetchedQuizzes = []; 
+
+        // --- Funções de Normalização e UI ---
+        function normalizeDiscipline(discipline) {
+            const lower = discipline.toLowerCase().trim();
+            const map = {
+                "matematica": "Matemática", "matemática": "Matemática", "math": "Matemática", "mat": "Matemática",
+                "portugues": "Português", "português": "Português", "lingua portuguesa": "Português",
+                "historia": "História", "história": "História",
+                "ciencias": "Ciências", "ciências": "Ciências", "ciencia": "Ciências", "ciência": "Ciências",
+                "fisica": "Física", "física": "Física",
+                "quimica": "Química", "química": "Química",
+                "biologia": "Biologia",
+                "geografia": "Geografia",
+                "ingles": "Inglês", "inglês": "Inglês",
+                "filosofia": "Filosofia",
+            };
+            return map[lower] || discipline; 
+        }
+
+
+        function populateClassSelects() {
+            const classOptions = [];
+            for (let i = 3; i <= 13; i++) {
+                classOptions.push(`${i}ª Classe`);
+            }
+            classOptions.push("Faculdade");
+
+            [quizClassSelect, filterClassSelect].forEach(selectEl => {
+                if(selectEl === filterClassSelect) { 
+                    const allOption = document.createElement('option');
+                    allOption.value = "";
+                    allOption.textContent = "Todas as Classes";
+                    selectEl.appendChild(allOption);
+                }
+                classOptions.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls;
+                    option.textContent = cls;
+                    selectEl.appendChild(option);
+                });
+            });
+        }
+
+
+        function showSection(sectionToShow) {
+            mainSelectionSection.classList.add('hidden');
+            loaderContainer.classList.add('hidden');
+            quizSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            
+            if (sectionToShow === 'main') mainSelectionSection.classList.remove('hidden');
+            else if (sectionToShow === 'loader') loaderContainer.classList.remove('hidden');
+            else if (sectionToShow === 'quiz') quizSection.classList.remove('hidden');
+            else if (sectionToShow === 'results') resultsSection.classList.remove('hidden');
+            else if (sectionToShow === 'error') errorSection.classList.remove('hidden');
+        }
+
+        function resetQuizState() {
+            currentQuestions = [];
+            currentQuestionIndex = 0;
+            score = 0;
+            pdfFileEl.value = ''; 
+            fileNameDisplay.textContent = '';
+            quizClassSelect.value = quizClassSelect.options[0]?.value || ""; 
+            quizDisciplineInput.value = ''; 
+            feedbackArea.innerHTML = '';
+            feedbackArea.className = 'feedback hidden'; 
+            nextQuestionBtn.disabled = true;
+            selectedOptionButton = null;
+            fileProcessingMessage.classList.add('hidden');
+            currentPdfNameForQuiz = "";
+            currentQuizClassName = "";
+            currentQuizDisciplineName = "";
+            currentQuizIdFromDb = null; 
+            quizStatusMessage.textContent = ''; 
+            quizStatusMessage.classList.add('hidden');
+        }
+
+        async function goBackToMain() {
+            resetQuizState();
+            filterAndRenderSavedQuizzes(); 
+            showSection('main');
+        }
+
+        pdfFileEl.addEventListener('change', () => {
+            if (pdfFileEl.files.length > 0) {
+                fileNameDisplay.textContent = `Ficheiro: ${pdfFileEl.files[0].name}`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
+        backToMainBtnQuiz.addEventListener('click', goBackToMain);
+        backToMainBtnResults.addEventListener('click', goBackToMain);
+        backToMainBtnError.addEventListener('click', goBackToMain);
+        
+        refreshQuizzesBtn.addEventListener('click', async () => {
+            filterClassSelect.value = ""; 
+            filterDisciplineInput.value = "";
+            await loadAndRenderSavedQuizzesFromDb(true); 
+        });
+
+        filterClassSelect.addEventListener('change', filterAndRenderSavedQuizzes);
+        filterDisciplineInput.addEventListener('input', filterAndRenderSavedQuizzes);
+
+
+        // --- Funções de Interação com Supabase e Filtros ---
+        async function fetchQuizzesFromDb() {
+            if (!supabaseClient) { 
+                // console.warn("Supabase client não inicializado. Não é possível buscar quizzes.");
+                return [];
+            }
+            try {
+                loaderText.textContent = "A carregar quizzes da BD...";
+                loaderContainer.classList.remove('hidden'); 
+                const { data, error } = await supabaseClient 
+                    .from('quizzes')
+                    .select('id, pdf_name, quiz_title, questions, classe, disciplina, created_at') 
+                    .order('created_at', { ascending: false });
+                
+                loaderContainer.classList.add('hidden'); 
+
+                if (error) {
+                    // console.error("Erro ao buscar quizzes do Supabase:", error);
+                    showError(`Erro ao buscar quizzes: ${error.message}`);
+                    return [];
+                }
+                // console.log("Quizzes buscados:", data);
+                allFetchedQuizzes = data || []; 
+                return allFetchedQuizzes;
+            } catch (e) {
+                loaderContainer.classList.add('hidden');
+                // console.error("Exceção ao buscar quizzes:", e);
+                showError(`Exceção ao buscar quizzes: ${e.message}`);
+                allFetchedQuizzes = [];
+                return [];
+            }
+        }
+
+        async function autoSaveQuizToDb(pdfName, quizTitle, questionsToSave, quizClass, quizDiscipline) { 
+            if (!supabaseClient) { 
+                // console.warn("Supabase client não inicializado. Não é possível guardar o quiz automaticamente.");
+                quizStatusMessage.textContent = 'Erro: Supabase não conectado.';
+                quizStatusMessage.classList.remove('text-green-600', 'hidden');
+                quizStatusMessage.classList.add('text-red-600');
+                return null;
+            }
+            if (!pdfName || !questionsToSave || questionsToSave.length === 0) {
+                // console.warn("Dados insuficientes para guardar quiz automaticamente.");
+                return null;
+            }
+
+            // console.log(`A tentar guardar automaticamente o quiz: ${quizTitle} (Classe: ${quizClass}, Disciplina: ${quizDiscipline})`);
+            quizStatusMessage.textContent = 'A guardar quiz na base de dados...';
+            quizStatusMessage.classList.remove('text-red-600', 'hidden');
+            quizStatusMessage.classList.add('text-green-600');
+
+
+            try {
+                const { data, error } = await supabaseClient 
+                    .from('quizzes')
+                    .insert([{ 
+                        pdf_name: pdfName, 
+                        quiz_title: quizTitle || `Quiz sobre "${pdfName}"`, 
+                        questions: questionsToSave,
+                        classe: quizClass, 
+                        disciplina: quizDiscipline 
+                    }])
+                    .select(); 
+
+                if (error) {
+                    // console.error("Erro ao guardar quiz automaticamente no Supabase:", error);
+                    quizStatusMessage.textContent = `Erro ao guardar: ${error.message.substring(0, 50)}...`;
+                    quizStatusMessage.classList.remove('text-green-600');
+                    quizStatusMessage.classList.add('text-red-600');
+                    return null;
+                }
+                
+                // console.log(`Quiz "${pdfName}" guardado automaticamente com ID: ${data[0].id}!`);
+                quizStatusMessage.textContent = 'Quiz guardado automaticamente na BD!';
+                quizStatusMessage.classList.remove('text-red-600');
+                quizStatusMessage.classList.add('text-green-600');
+                currentQuizIdFromDb = data[0].id; 
+                return data[0];
+
+            } catch (e) {
+                // console.error("Exceção ao guardar quiz automaticamente:", e);
+                quizStatusMessage.textContent = `Exceção ao guardar: ${e.message.substring(0,50)}...`;
+                quizStatusMessage.classList.remove('text-green-600');
+                quizStatusMessage.classList.add('text-red-600');
+                return null;
+            }
+        }
+        
+        function filterAndRenderSavedQuizzes() {
+            const classFilter = filterClassSelect.value;
+            const disciplineFilterText = filterDisciplineInput.value.toLowerCase().trim();
+            
+            const filteredQuizzes = allFetchedQuizzes.filter(quiz => {
+                const matchClass = !classFilter || quiz.classe === classFilter;
+                
+                const quizDisciplineLower = quiz.disciplina ? quiz.disciplina.toLowerCase() : "";
+                const normalizedQuizDiscipline = normalizeDiscipline(quizDisciplineLower);
+                const normalizedFilterDiscipline = normalizeDiscipline(disciplineFilterText);
+
+                const matchDiscipline = !disciplineFilterText || 
+                                        quizDisciplineLower.includes(disciplineFilterText) ||
+                                        (normalizedFilterDiscipline && normalizedQuizDiscipline === normalizedFilterDiscipline);
+
+                return matchClass && matchDiscipline;
+            });
+            renderSavedQuizzesListFromDb(filteredQuizzes);
+        }
+
+
+        function renderSavedQuizzesListFromDb(quizzesToRender) { 
+            savedQuizzesList.innerHTML = ''; 
+            if (!quizzesToRender || quizzesToRender.length === 0) {
+                noSavedQuizzesMsg.classList.remove('hidden');
+                return;
+            }
+            noSavedQuizzesMsg.classList.add('hidden');
+
+            quizzesToRender.forEach(quiz => { 
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'saved-quiz-item';
+                
+                const detailsContainer = document.createElement('div');
+                detailsContainer.className = 'saved-quiz-details';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'saved-quiz-title block';
+                titleSpan.textContent = quiz.quiz_title || `Quiz: ${quiz.pdf_name}`;
+                detailsContainer.appendChild(titleSpan);
+                
+                const metaContainer = document.createElement('div');
+                metaContainer.className = 'saved-quiz-meta flex flex-wrap items-center gap-2 mt-1'; 
+
+                if(quiz.classe) {
+                    const classSpan = document.createElement('span');
+                    classSpan.className = 'saved-quiz-class-badge';
+                    classSpan.textContent = quiz.classe;
+                    metaContainer.appendChild(classSpan);
+                }
+                 if(quiz.disciplina) {
+                    const disciplineSpan = document.createElement('span');
+                    disciplineSpan.className = 'saved-quiz-discipline-badge';
+                    disciplineSpan.textContent = quiz.disciplina;
+                    metaContainer.appendChild(disciplineSpan);
+                }
+                detailsContainer.appendChild(metaContainer);
+
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'saved-quiz-info block mt-2'; 
+                dateSpan.textContent = `Criado em: ${new Date(quiz.created_at).toLocaleDateString()}`;
+                detailsContainer.appendChild(dateSpan);
+
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'saved-quiz-actions flex-shrink-0';
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'btn btn-primary btn-sm'; 
+                loadBtn.textContent = 'Carregar';
+                loadBtn.onclick = () => handleLoadSavedQuizFromDb(quiz);
+                
+                actionsDiv.appendChild(loadBtn);
+                itemDiv.appendChild(detailsContainer);
+                itemDiv.appendChild(actionsDiv);
+                savedQuizzesList.appendChild(itemDiv);
+            });
+        }
+
+        async function loadAndRenderSavedQuizzesFromDb(forceFetch = false) {
+            if (!supabaseClient) return; 
+            if (forceFetch || allFetchedQuizzes.length === 0) { 
+                await fetchQuizzesFromDb();
+            }
+            filterAndRenderSavedQuizzes(); 
+        }
+        
+        function handleLoadSavedQuizFromDb(quizToLoad) {
+            if (quizToLoad && quizToLoad.questions) {
+                resetQuizState();
+                currentQuestions = quizToLoad.questions; 
+                currentPdfNameForQuiz = quizToLoad.pdf_name;
+                currentQuizClassName = quizToLoad.classe || ""; 
+                currentQuizDisciplineName = quizToLoad.disciplina || ""; 
+                currentQuizIdFromDb = quizToLoad.id; 
+                startQuiz(true); 
+            } else {
+                // alert("Não foi possível carregar o quiz selecionado ou não continha perguntas.");
+                // console.error("Quiz inválido para carregar:", quizToLoad);
+                 showError("Não foi possível carregar o quiz selecionado ou este não continha perguntas.");
+            }
+        }
+
+        // --- Funções do Quiz (Geração, Extração PDF) ---
+        async function extractTextFromPdf(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async (event) => {
+                    try {
+                        const typedArray = new Uint8Array(event.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+                        let fullText = '';
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                        }
+                        resolve(fullText.trim());
+                    } catch (error) {
+                        // console.error("Erro ao ler PDF:", error);
+                        reject(new Error("Não foi possível ler o conteúdo do arquivo PDF. Verifique se é um PDF válido e não protegido ou baseado em imagem."));
+                    }
+                };
+                reader.onerror = (error) => {
+                    // console.error("Erro no FileReader:", error);
+                    reject(new Error("Erro ao carregar o arquivo."));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function handleGenerateQuiz() {
+            const pdfFile = pdfFileEl.files[0];
+            const quizClassValue = quizClassSelect.value; 
+            const quizDisciplineValue = quizDisciplineInput.value.trim(); 
+
+            if (!pdfFile) {
+                showError("Por favor, selecione um arquivo PDF.");
+                return;
+            }
+            if (!quizClassValue) { 
+                showError("Por favor, selecione uma classe para o quiz.");
+                quizClassSelect.focus();
+                return;
+            }
+             if (!quizDisciplineValue) {
+                showError("Por favor, defina uma disciplina para o quiz (ex: Matemática, Português).");
+                quizDisciplineInput.focus();
+                return;
+            }
+
+            currentPdfNameForQuiz = pdfFile.name; 
+            currentQuizClassName = quizClassValue; 
+            currentQuizDisciplineName = quizDisciplineValue; 
+            currentQuizIdFromDb = null; 
+
+            showSection('loader');
+            loaderText.textContent = 'Lendo o arquivo PDF...';
+            let pdfTextContent = '';
+            try {
+                pdfTextContent = await extractTextFromPdf(pdfFile);
+                if (!pdfTextContent || pdfTextContent.length < 50) {
+                    throw new Error("O PDF parece estar vazio ou não contém texto extraível suficiente.");
+                }
+                fileProcessingMessage.textContent = `Texto extraído de "${pdfFile.name}" (${(pdfTextContent.length / 1024).toFixed(2)} KB).`;
+                fileProcessingMessage.classList.remove('hidden');
+                loaderText.textContent = `A gerar quiz de "${currentQuizClassName} - ${currentQuizDisciplineName}", por favor aguarde...`;
+            } catch (error) {
+                // console.error("Erro na extração de texto do PDF:", error);
+                showError(error.message);
+                return;
+            }
+
+            try {
+                const MAX_TEXT_LENGTH = 15000;
+                if (pdfTextContent.length > MAX_TEXT_LENGTH) {
+                    // console.warn(`O texto do PDF é muito longo (${pdfTextContent.length} caracteres). Truncando para ${MAX_TEXT_LENGTH} caracteres.`);
+                    pdfTextContent = pdfTextContent.substring(0, MAX_TEXT_LENGTH);
+                }
+                
+                const normalizedDisciplineForIA = normalizeDiscipline(currentQuizDisciplineName); 
+
+                const prompt = `
+                    Com base no seguinte texto extraído de um documento PDF (relacionado à classe "${currentQuizClassName}" e disciplina "${normalizedDisciplineForIA}") chamado "${currentPdfNameForQuiz}", gere EXATAMENTE 5 perguntas de múltipla escolha em português do Brasil.
+                    As perguntas devem ser relevantes ao conteúdo principal do texto, à classe e à disciplina informadas.
+                    Formate a saída como um objeto JSON que contém uma chave "perguntas", e o valor dessa chave é um array de objetos de pergunta. Cada objeto no array deve representar uma pergunta e ter os seguintes campos:
+                    - "pergunta": (string) O texto da pergunta.
+                    - "opcoes": (array de 4 strings) As opções de resposta, onde uma é claramente correta com base no texto.
+                    - "resposta_correta_idx": (number) O índice (0 a 3) da opção correta no array "opcoes".
+
+                    Exemplo de formato de saída esperado:
+                    {
+                        "perguntas": [
+                            {
+                                "pergunta": "Qual é a capital da França?",
+                                "opcoes": ["Londres", "Berlim", "Paris", "Madri"],
+                                "resposta_correta_idx": 2
+                            }
+                        ]
+                    }
+
+                    Texto para gerar as perguntas:
+                    ---
+                    ${pdfTextContent}
+                    ---
+                `;
+
+
+                const requestBody = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody),
+                });
+
+                if (!response.ok) {
+                    const errorBodyText = await response.text(); 
+                    throw new Error(`Erro na API Gemini (${response.status} ${response.statusText}). Detalhes: ${errorBodyText.substring(0, 300)}...`);
+                }
+
+                const data = await response.json(); 
+                // console.log("Dados JSON da API Gemini:", JSON.stringify(data, null, 2));
+
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    const jsonResponseText = data.candidates[0].content.parts[0].text;
+                    // console.log("Texto JSON bruto da API (jsonResponseText):", jsonResponseText.substring(0,500)+"...");
+                    try {
+                        const parsedResponseObject = JSON.parse(jsonResponseText);
+                        // console.log("Objeto JSON parseado da API:", JSON.stringify(parsedResponseObject, null, 2));
+
+                        if (parsedResponseObject && Array.isArray(parsedResponseObject.perguntas) && parsedResponseObject.perguntas.length > 0) {
+                            currentQuestions = parsedResponseObject.perguntas;
+                        } else if (Array.isArray(parsedResponseObject) && parsedResponseObject.length > 0) {
+                            currentQuestions = parsedResponseObject;
+                            // console.warn("API retornou um array JSON diretamente. Usando-o.");
+                        } else {
+                            throw new Error(`A API retornou JSON, mas não no formato esperado de {"perguntas": [...] } ou o array está vazio. Conteúdo: ${jsonResponseText.substring(0,300)}`);
+                        }
+                        
+                        currentQuestions.forEach((q, idx) => { 
+                            if (typeof q.pergunta !== 'string' || !Array.isArray(q.opcoes) || q.opcoes.length !== 4 || typeof q.resposta_correta_idx !== 'number' || q.resposta_correta_idx < 0 || q.resposta_correta_idx > 3) {
+                                throw new Error(`Formato de pergunta inválido (pergunta ${idx + 1}).`);
+                            }
+                        });
+
+                        await autoSaveQuizToDb(
+                            currentPdfNameForQuiz, 
+                            `Quiz: ${currentPdfNameForQuiz}`, 
+                            currentQuestions, 
+                            currentQuizClassName,
+                            currentQuizDisciplineName 
+                        );
+
+                    } catch (e) { 
+                        throw new Error(`Problema ao processar JSON das perguntas da API: ${e.message}. Resposta recebida: ${jsonResponseText.substring(0,300)}`);
+                    }
+                } else { 
+                    if (data.promptFeedback?.blockReason) {
+                         throw new Error(`API bloqueou: ${data.promptFeedback.blockReason.reason}.`);
+                    }
+                    if (data.error) { 
+                        throw new Error(`API Gemini retornou erro: ${data.error.message}`);
+                    }
+                    throw new Error("Resposta da API Gemini não continha dados de perguntas esperados.");
+                }
+                startQuiz(false); 
+            } catch (error) { 
+                // console.error("Erro final em handleGenerateQuiz:", error);
+                showError(`Falha ao gerar o quiz: ${error.message}`); 
+            }
+        }
+        generateQuizBtn.addEventListener('click', handleGenerateQuiz);
+
+        // --- Funções do Jogo ---
+        function startQuiz(isLoadedQuiz = false) {
+            currentQuestionIndex = 0;
+            score = 0;
+            showSection('quiz');
+            
+            quizStatusMessage.textContent = ''; 
+            quizStatusMessage.classList.add('hidden'); 
+
+            if (isLoadedQuiz && currentQuizIdFromDb) {
+                 quizStatusMessage.textContent = 'Quiz carregado da base de dados.';
+                 quizStatusMessage.classList.remove('text-red-600', 'hidden');
+                 quizStatusMessage.classList.add('text-green-600');
+            } else if (currentQuizIdFromDb) { 
+                 quizStatusMessage.textContent = 'Quiz guardado automaticamente na BD!';
+                 quizStatusMessage.classList.remove('text-red-600', 'hidden');
+                 quizStatusMessage.classList.add('text-green-600');
+            }
+
+
+            if (currentPdfNameForQuiz) {
+                currentQuizTitle.textContent = `Quiz: ${currentPdfNameForQuiz}`;
+                currentQuizPdfName.textContent = `Ficheiro: ${currentPdfNameForQuiz}`;
+            } else {
+                currentQuizTitle.textContent = "Quiz";
+                currentQuizPdfName.textContent = "";
+            }
+            currentQuizClassDisplay.textContent = currentQuizClassName ? `Classe: ${currentQuizClassName}` : "";
+            currentQuizDisciplineDisplay.textContent = currentQuizDisciplineName ? `Disciplina: ${currentQuizDisciplineName}` : "";
+
+
+            displayQuestion();
+        }
+        
+        restartQuizBtn.addEventListener('click', () => {
+            startQuiz(!!currentQuizIdFromDb); 
+        });
+
+        function displayQuestion() {
+            feedbackArea.innerHTML = '';
+            feedbackArea.className = 'feedback hidden'; 
+            nextQuestionBtn.textContent = 'Próxima Pergunta';
+            nextQuestionBtn.disabled = true; 
+            selectedOptionButton = null; 
+
+            if (currentQuestionIndex < currentQuestions.length) {
+                const question = currentQuestions[currentQuestionIndex];
+                questionTextEl.textContent = `Pergunta ${currentQuestionIndex + 1} de ${currentQuestions.length}: ${question.pergunta}`;
+                optionsContainer.innerHTML = ''; 
+
+                question.opcoes.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-btn');
+                    button.dataset.index = index; 
+                    button.addEventListener('click', () => selectOption(button, index, question.resposta_correta_idx));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        function selectOption(button, selectedIndex, correctIndex) {
+            if (selectedOptionButton) return; 
+
+            selectedOptionButton = button;
+            nextQuestionBtn.disabled = false;
+
+            const allOptionButtons = Array.from(optionsContainer.querySelectorAll('.option-btn'));
+            allOptionButtons.forEach(btn => {
+                btn.disabled = true; 
+                const btnIndex = parseInt(btn.dataset.index);
+                if (btnIndex === correctIndex) {
+                    btn.classList.add('correct');
+                } else if (btnIndex === selectedIndex) {
+                     btn.classList.add('incorrect');
+                }
+            });
+            
+            feedbackArea.classList.remove('hidden'); 
+            if (selectedIndex === correctIndex) {
+                score++;
+                feedbackArea.textContent = 'Resposta Correta!';
+                feedbackArea.classList.add('correct');
+                feedbackArea.classList.remove('incorrect');
+            } else {
+                feedbackArea.textContent = `Resposta Incorreta. A resposta correta era: "${currentQuestions[currentQuestionIndex].opcoes[correctIndex]}"`;
+                feedbackArea.classList.add('incorrect');
+                feedbackArea.classList.remove('correct');
+            }
+
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                nextQuestionBtn.textContent = 'Ver Resultados';
+            }
+        }
+        nextQuestionBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            displayQuestion();
+        });
+
+        function showResults() {
+            showSection('results');
+            resultsQuizTitle.textContent = `Resultados para: ${currentPdfNameForQuiz || "Quiz"}`;
+            const classText = currentQuizClassName ? `Classe: ${currentQuizClassName}` : 'Classe: N/A';
+            const disciplineText = currentQuizDisciplineName ? `Disciplina: ${currentQuizDisciplineName}` : 'Disciplina: N/A';
+            
+            let percentage = 0;
+            if (currentQuestions.length > 0) {
+                percentage = (score / currentQuestions.length) * 100;
+            }
+            scoreTextEl.innerHTML = `
+                ${classText} <br> ${disciplineText} <br><br>
+                Você acertou ${score} de ${currentQuestions.length} perguntas (${percentage.toFixed(0)}%)!
+            `;
+        }
+
+        function showError(message) {
+            errorMessageEl.textContent = message;
+            showSection('error');
+        }
+
+        // --- Inicialização ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            populateClassSelects(); 
+            resetQuizState(); 
+            if (supabaseClient) { 
+                await loadAndRenderSavedQuizzesFromDb(true); 
+            }
+            showSection('main');
+        });
+
+    </script>
+</body>
+</html>
